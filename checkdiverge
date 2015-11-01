@@ -1,0 +1,24 @@
+#!/bin/bash
+
+ALERT_MAIL=$2
+REPO=$1
+
+diverged_branches=()
+git fetch $REPO
+for row in $(git for-each-ref --sort=-committerdate --count=30 refs/heads/ --format="%(objectname:short) %(refname:short)"|sed -e "s/\ /:/g")
+do
+    commit=$(echo $row|cut -d: -f1)
+    ref=$(echo $row|cut -d: -f2)
+
+    is_diverged=$(diff -u \
+        <(git log --pretty=format:%h $commit|xargs -I{} echo {}) \
+        <(git rev-list --first-parent $commit --abbrev-commit|xargs -I{} echo {})|\
+        sed -ne "s/^\(+\|-\)//p")
+    if [ "$is_diverged" != "" ]; then 
+        diverged_branches+=($ref)
+    fi
+done
+if [ ${#diverged_branches[@]} -eq 0 ]; then
+    message="Your git repository has some diverged branches as below:\n $diverged_branches"
+    echo $message|mail -s "Diverged branch alert !!!" $ALERT_MAIL
+fi
