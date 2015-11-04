@@ -1,24 +1,44 @@
 #!/bin/bash
+repo=$1
+email=$2
+function contains() {
+    local n=$#
+    local value=${!n}
+    for ((i=1;i < $#;i++)) {
+        if [ "${!i}" == "${value}" ]; then
+            return 0
+        fi
+    }
+    return 1
+}
 
-ALERT_MAIL=$2
-REPO=$1
-
-diverged_branches=()
-git fetch $REPO
-for row in $(git for-each-ref --sort=-committerdate --count=30 refs/heads/ --format="%(objectname:short) %(refname:short)"|sed -e "s/\ /:/g")
+git fetch $repo
+latest_refs=$(git for-each-ref \
+                     --sort=committerdate \
+                     --count=30 refs/heads/ \
+                     --format="%(objectname:short) %(refname:short)"|\
+                     sed -e "s/\ /:/g")
+is_diverged=0
+for row in $latest_refs
 do
-    commit=$(echo $row|cut -d: -f1)
+    commit_hash=$(echo $row|cut -d: -f1)
     ref=$(echo $row|cut -d: -f2)
-
-    is_diverged=$(diff -u \
-        <(git log --pretty=format:%h $commit|xargs -I{} echo {}) \
-        <(git rev-list --first-parent $commit --abbrev-commit|xargs -I{} echo {})|\
-        sed -ne "s/^\(+\|-\)//p")
-    if [ "$is_diverged" != "" ]; then 
-        diverged_branches+=($ref)
-    fi
+    merge_base=$(git merge-base master $commit_hash)
+    commit_history=$(git log --pretty=format:%h \
+                             --abbrev-commit $merge_base..$commit_hash)
+    first_level_parents=$(git rev-list --first-parent \
+                                       --abbrev-commit $merge_base..$commit_hash)
+    result=$(diff -u <(echo $commit_history|xargs -n1) \
+                   <(echo $first_level_parents|xargs -n1)|\
+                   sed -ne "s/^\(+\|-\)//p"|grep -ve "^\(++\|--\)")
+    for commit in $result
+    do
+        contains_branches=($(git branch -a --contains $commit|cut -d\/ -f2|\
+                             sed -ne "s/^\(\ |*\)//p"))
+        if contains "${contains_branches[@]}" $ref; then
+            echo $ref" is diverged!"
+            is_diverged=1
+        fi
+    done
 done
-if [ ${#diverged_branches[@]} -eq 0 ]; then
-    message="Your git repository has some diverged branches as below:\n $diverged_branches"
-    echo $message|mail -s "Diverged branch alert !!!" $ALERT_MAIL
-fi
+exit $is_diverged
