@@ -6,7 +6,7 @@ If repository has any diverged branch, script finalizes without zero code.
 # Installation
 
 ```shell
-$ cd /opt;sudo git clone git@github.com:ibrahimgunduz34/checkdiverge.git; sudo ln -s /opt/checkdiverge/checkdiverge /usr/local/bin/.
+$ cd ~/;git clone git@github.com:ibrahimgunduz34/checkdiverge.git; sudo ln -s ~/checkdiverge/checkdiverge /usr/local/bin/.
 ```
 
 # Usage
