@@ -1,4 +1,4 @@
-# Check Diverge!
+# Diverge Detector
 
 This script, fetch the last pushed branches from repository and check the each branch for diverge.
 If repository has any diverged branch, script finalizes without zero code.
