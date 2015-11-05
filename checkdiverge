@@ -1,6 +1,5 @@
 #!/bin/bash
 repo=$1
-email=$2
 function contains() {
     local n=$#
     local value=${!n}
