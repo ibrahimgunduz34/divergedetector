@@ -6,13 +6,13 @@ If repository has any diverged branch, script finalizes without zero code.
 # Installation
 
 ```shell
-$ cd ~/;git clone git@github.com:ibrahimgunduz34/checkdiverge.git; sudo ln -s ~/checkdiverge/checkdiverge /usr/local/bin/.
+$ cd ~/;git clone git@github.com:ibrahimgunduz34/divergedetector.git; sudo ln -s ~/divergedetector/divergedetector /usr/local/bin/.
 ```
 
 # Usage
 * Enter your git repository
 * run the follwing command:
 ```shell
-checkdiverge origin
+divergedetector origin
 ```
 
