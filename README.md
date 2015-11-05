@@ -1,7 +1,6 @@
 # Diverge Detector
 
-This script, fetch the last pushed branches from repository and check the each branch for diverge.
-If repository has any diverged branch, script finalizes without zero code.
+Diverge detector, detects diverged branches in the specified repository and throws an error for branches which is problem. 
 
 # Installation
 
